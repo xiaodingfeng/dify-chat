@@ -5,7 +5,7 @@ import { Space } from 'antd'
 import classNames from 'classnames'
 import React from 'react'
 
-import { GithubIcon, Logo } from '@/components/logo'
+import { Logo } from '@/components/logo'
 
 import CenterTitleWrapper from './components/center-title-wrapper'
 
@@ -65,7 +65,6 @@ export default function HeaderLayout(props: IHeaderLayoutProps) {
 								/>
 							</div>
 						</ThemeSelector>
-						<GithubIcon />
 					</Space>
 				)}
 			</HeaderSiderIcon>

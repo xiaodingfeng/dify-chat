@@ -2,7 +2,7 @@ import { DifyAppStore, type IDifyAppItem } from '@dify-chat/core'
 
 import { BaseRequest } from '@/services/base-request'
 
-const API_BASE_URL = 'http://localhost:3000'
+const API_BASE_URL = '/dataapi'
 
 const request = new BaseRequest({ baseURL: API_BASE_URL })
 
@@ -37,6 +37,10 @@ class DifyAppService extends DifyAppStore {
 
 	async deleteApp(id: string): Promise<void> {
 		await request.delete(`/apps/${id}`)
+	}
+
+	async enableSetting(): Promise<IDifyAppItem[]> {
+		return await request.get(`/apps/enableSetting`)
 	}
 }
 

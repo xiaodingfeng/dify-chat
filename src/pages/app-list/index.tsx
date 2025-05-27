@@ -9,7 +9,7 @@ import {
 } from '@dify-chat/core'
 import { useIsMobile } from '@dify-chat/helpers'
 import { useRequest } from 'ahooks'
-import { Button, Col, Dropdown, Empty, message, Row } from 'antd'
+import { Button, Col, Dropdown, Empty, Input, message, Row, Tag } from 'antd'
 import { useHistory } from 'pure-react-router'
 import { useEffect, useState } from 'react'
 
@@ -24,6 +24,8 @@ export default function AppListPage() {
 	const [appEditDrawerOpen, setAppEditDrawerOpen] = useState(false)
 	const [appEditDrawerMode, setAppEditDrawerMode] = useState<AppDetailDrawerModeEnum>()
 	const [appEditDrawerAppItem, setAppEditDrawerAppItem] = useState<IDifyAppItem>()
+	const [selectedTags, setSelectedTags] = useState<string[]>([])
+	const [searchKeyword, setSearchKeyword] = useState('')
 
 	const { runAsync: getAppList, data: list } = useRequest(
 		() => {
@@ -37,7 +39,15 @@ export default function AppListPage() {
 			},
 		},
 	)
-
+	const allTags = Array.from(new Set(list?.flatMap(app => app.info.tags || []))) || []
+	const filteredList = list?.filter(app => {
+		const tags = app.info.tags || []
+		return (
+			(selectedTags.length === 0 || selectedTags.some(tag => tags.includes(tag))) &&
+			(app.info.name?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+				app.info.description?.toLowerCase().includes(searchKeyword.toLowerCase()))
+		)
+	})
 	useEffect(() => {
 		if (mode === 'multiApp') {
 			getAppList()
@@ -63,13 +73,46 @@ export default function AppListPage() {
 					</div>
 				}
 			/>
+			<div className="flex flex-col sm:flex-row flex-wrap justify-between items-center gap-4 px-6 py-2 bg-white rounded-xl shadow-sm">
+				{/* 标签区域 */}
+				<div className="flex-1 min-w-0 overflow-x-auto py-1">
+					<div className="flex flex-wrap gap-2">
+						{allTags.map(tag => (
+							<Tag.CheckableTag
+								key={tag}
+								checked={selectedTags.includes(tag)}
+								onChange={checked => {
+									setSelectedTags(
+										checked ? [...selectedTags, tag] : selectedTags.filter(t => t !== tag),
+									)
+								}}
+							>
+								{tag}
+							</Tag.CheckableTag>
+						))}
+					</div>
+				</div>
+
+				{/* 搜索输入框 */}
+				<div className="flex-shrink-0">
+					<Input
+						placeholder="搜索应用名称"
+						allowClear
+						size="middle"
+						value={searchKeyword}
+						onChange={e => setSearchKeyword(e.target.value)}
+						className="w-full sm:w-48 rounded-full shadow-sm"
+					/>
+				</div>
+			</div>
+
 			<div className="flex-1 bg-theme-main-bg rounded-3xl py-6 overflow-y-auto box-border overflow-x-hidden">
 				{list?.length ? (
 					<Row
 						gutter={[16, 16]}
 						className="px-3 md:px-6"
 					>
-						{list.map(item => {
+						{filteredList.map(item => {
 							const hasTags = item.info.tags?.length
 							return (
 								<Col
